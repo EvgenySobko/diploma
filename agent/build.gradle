@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'org.diploma.plugin'
+
+repositories {
+    mavenCentral()
+}
+
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+
+jar {
+    manifest {
+        archiveFileName = "agent.jar"
+        attributes(
+                "Manifest-Version": "1.0",
+                "Premain-Class": "com.evgenysobko.diploma.agent.AgentMain",
+                "Main-Class": "com.evgenysobko.diploma.agent.AgentMain",
+                "Agent-Class": "com.evgenysobko.diploma.agent.AgentMain",
+                "Can-Retransform-Classes": true,
+                "Implementation-Title": "agent",
+                "Boot-Class-Path": archiveFileName
+        )
+    }
+
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}

@@ -4,14 +4,17 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.0'
 }
 
-group 'org.example'
+group 'org.diploma.plugin'
 version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
+def javaAgent
+
 dependencies {
+    compileOnly(project(":agent"))
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
@@ -21,11 +24,29 @@ dependencies {
     implementation "org.ow2.asm:asm-commons:8.0.1"
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2020.3.4'
     plugins = ["java"]
 }
+
+runIde {
+    jvmArgs '-Djdk.attach.allowAttachSelf'
+    maxHeapSize = "2g"
+}
+
+prepareSandbox {
+    def dir = "diploma/agent"
+    javaAgent = configurations.compileOnly.find {it.name == "agent.jar"}
+    from(javaAgent) { into (dir) }
+}
+
+plugins.withType(JavaPlugin).whenPluginAdded {
+    sourceSets {
+        test.compileClasspath += configurations.compileOnly
+        test.runtimeClasspath += configurations.compileOnly
+    }
+}
+
 patchPluginXml {
     changeNotes """
       Add change notes here.<br>

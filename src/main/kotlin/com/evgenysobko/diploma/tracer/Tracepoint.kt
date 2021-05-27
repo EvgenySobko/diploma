@@ -36,19 +36,12 @@ class MethodTracepoint(
         }
     }
 
-    @Volatile // Value may change over time as new trace requests come in.
+    @Volatile
     override var measureWallTime: Boolean = true
-
-    // Note: reference equality is sufficient currently because TracerConfig maintains
-    // a single canonical MethodTracepoint per traced method.
 
     override fun toString(): String = displayName
 }
 
-/**
- * A [Tracepoint] representing a method call with a specific set of arguments.
- * Two instances with the same backing [method] and the same [argStrings] are considered equal.
- */
 class MethodTracepointWithArgs(
     private val method: Tracepoint,
     private val argStrings: Array<String>

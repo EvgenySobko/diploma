@@ -6,11 +6,10 @@ import com.intellij.openapi.diagnostic.Logger
 /** Dispatches method entry/exit events to the [CallTreeManager]. */
 class TracerHookImpl : TracerHook {
 
-    override fun enter(methodId: Int, args: Array<*>?) {
+    override fun enter(methodId: Int, args: Array<Any>?) {
         doWithExceptionLogging {
             val methodTracepoint = TracerConfig.getMethodTracepoint(methodId)
 
-            // Support for parameter tracing.
             val tracepoint =
                 if (args != null) {
                     val argStrings = Array(args.size) { args[it].toString() }

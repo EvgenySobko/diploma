@@ -1,6 +1,6 @@
 package com.evgenysobko.diploma.tracer
 
-import com.evgenysobko.diploma.agent.AgentLoader
+import com.evgenysobko.diploma.AgentLoader
 import com.evgenysobko.diploma.tracer.*
 import com.evgenysobko.diploma.util.ExecutorWithExceptionLogging
 import com.intellij.openapi.Disposable

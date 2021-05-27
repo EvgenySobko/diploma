@@ -1,21 +1,14 @@
 <idea-plugin>
-    <id>com.github.evgenysobko.diploma</id>
-    <name>diploma</name>
+    <id>com.evgenysobko.diploma</id>
+    <name>PluginsInside</name>
     <vendor>evgenysobko</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.evgenysobko.diploma.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.evgenysobko.diploma.services.MyProjectService"/>
         <toolWindow id="myPlugin" anchor="bottom" secondary="true"
                     factoryClass="com.evgenysobko.diploma.toolwindow.ToolWindowFactory"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.evgenysobko.diploma.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 
 </idea-plugin>

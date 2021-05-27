@@ -1,9 +1,9 @@
 package com.evgenysobko.diploma.util
 
+import com.intellij.openapi.diagnostic.Logger
 import java.text.NumberFormat
 import kotlin.math.absoluteValue
 
-// A peculiar omission from the Kotlin standard library.
 inline fun <T> Iterable<T>.sumByLong(selector: (T) -> Long): Long {
     var sum = 0L
     for (element in this) {
@@ -14,7 +14,6 @@ inline fun <T> Iterable<T>.sumByLong(selector: (T) -> Long): Long {
 
 inline fun <T> Sequence<T>.sumByLong(selector: (T) -> Long): Long = asIterable().sumByLong(selector)
 
-// Helper methods for locale-aware number rendering.
 private val formatter = NumberFormat.getInstance()
 fun formatNum(num: Long): String = formatter.format(num)
 fun formatNum(num: Long, unit: String): String = "${formatNum(num)} $unit"
@@ -29,3 +28,5 @@ fun formatNsInBestUnit(ns: Long): String {
         else -> formatNum(ns / 1_000_000, "ms")
     }
 }
+
+fun <T> T.log(message: Any?) = Logger.getInstance(this!!::class.java).warn(message.toString())

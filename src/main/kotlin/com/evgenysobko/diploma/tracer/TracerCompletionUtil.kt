@@ -1,6 +1,6 @@
 package com.evgenysobko.diploma.tracer
 
-import com.evgenysobko.diploma.agent.AgentLoader
+import com.evgenysobko.diploma.AgentLoader
 import com.intellij.codeInsight.AutoPopupController
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.InsertionContext
@@ -12,15 +12,7 @@ import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.progress.ProgressManager
-import com.intellij.util.PlatformIcons.ABSTRACT_CLASS_ICON
-import com.intellij.util.PlatformIcons.ANNOTATION_TYPE_ICON
-import com.intellij.util.PlatformIcons.ANONYMOUS_CLASS_ICON
-import com.intellij.util.PlatformIcons.CLASS_ICON
-import com.intellij.util.PlatformIcons.ENUM_ICON
-import com.intellij.util.PlatformIcons.EXCEPTION_CLASS_ICON
-import com.intellij.util.PlatformIcons.INTERFACE_ICON
-import com.intellij.util.PlatformIcons.METHOD_ICON
-import com.intellij.util.PlatformIcons.PACKAGE_ICON
+import com.intellij.util.PlatformIcons.*
 import com.intellij.util.containers.ArrayListSet
 import java.lang.reflect.Modifier
 import javax.swing.Icon

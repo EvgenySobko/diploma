@@ -1,6 +1,6 @@
 package com.evgenysobko.diploma.tracer
 
-import com.evgenysobko.diploma.agent.AgentLoader
+import com.evgenysobko.diploma.AgentLoader
 import com.evgenysobko.diploma.util.GlobMatcher
 import com.intellij.openapi.progress.ProgressManager
 import org.objectweb.asm.Type
