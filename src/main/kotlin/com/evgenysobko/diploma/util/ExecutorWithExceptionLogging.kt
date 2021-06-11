@@ -6,10 +6,6 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
-/**
- * This is just a wrapper around [AppExecutorUtil.createBoundedApplicationPoolExecutor]
- * with improved exception logging behavior.
- */
 class ExecutorWithExceptionLogging(name: String, maxThreads: Int) {
     private val backend = AppExecutorUtil.createBoundedScheduledExecutorService(name, maxThreads)
 
@@ -39,7 +35,6 @@ class ExecutorWithExceptionLogging(name: String, maxThreads: Int) {
         }
         catch (e: Throwable) {
             if (e !is ControlFlowException) {
-                // Log the exception, because ScheduledExecutorService will silently suppresses it!
                 Logger.getInstance(ExecutorWithExceptionLogging::class.java).error(e)
             }
             throw e

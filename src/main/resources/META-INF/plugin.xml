@@ -1,13 +1,13 @@
 <idea-plugin>
     <id>com.evgenysobko.diploma</id>
-    <name>PluginsInside</name>
+    <name>PluginsPerformance</name>
     <vendor>evgenysobko</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="myPlugin" anchor="bottom" secondary="true"
+        <toolWindow id="myPlugin" anchor="bottom" secondary="true" doNotActivateOnStart="true"
                     factoryClass="com.evgenysobko.diploma.toolwindow.ToolWindowFactory"/>
     </extensions>
 

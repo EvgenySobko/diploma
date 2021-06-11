@@ -27,7 +27,6 @@ interface CallTree {
     }
 }
 
-/** A mutable call tree implementation. */
 class MutableCallTree(
     override val tracepoint: Tracepoint
 ): CallTree {

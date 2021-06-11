@@ -2,6 +2,7 @@ package com.evgenysobko.diploma.tracer
 
 import com.evgenysobko.diploma.agent.TracerTrampoline
 import com.intellij.openapi.diagnostic.Logger
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes.ASM8
 import org.objectweb.asm.*
 import org.objectweb.asm.ClassReader.EXPAND_FRAMES
 import org.objectweb.asm.ClassWriter.COMPUTE_MAXS
@@ -11,7 +12,7 @@ import java.lang.instrument.ClassFileTransformer
 import java.security.ProtectionDomain
 import kotlin.reflect.jvm.javaMethod
 
-private const val ASM_API = 8 shl 16 or 0 shl 8
+private const val ASM_API = ASM8
 
 class TracerClassFileTransformer : ClassFileTransformer {
 
@@ -30,7 +31,7 @@ class TracerClassFileTransformer : ClassFileTransformer {
                 null
             }
         } catch (e: Throwable) {
-            Logger.getInstance(javaClass).error("Failed to instrument class $classJvmName", e)
+            //Logger.getInstance(javaClass).error("Failed to instrument class $classJvmName", e)
             null
         }
     }
@@ -42,7 +43,7 @@ class TracerClassFileTransformer : ClassFileTransformer {
         val reader = ClassReader(classBytes)
         val writer = ClassWriter(reader, COMPUTE_MAXS)
         val classVisitor = TracerClassVisitor(clazz, writer)
-        reader.accept(classVisitor, EXPAND_FRAMES) // EXPAND_FRAMES is required by AdviceAdapter.
+        reader.accept(classVisitor, EXPAND_FRAMES)
         return when {
             classVisitor.transformedSomeMethods -> writer.toByteArray()
             else -> null
@@ -138,7 +139,6 @@ class TracerMethodVisitor(
             return
         }
 
-        // See the similar code in GeneratorAdapter.loadArgArray().
         push(tracedParams.size)
         newArray(OBJECT_TYPE)
         for ((storeIndex, paramIndex) in tracedParams.withIndex()) {

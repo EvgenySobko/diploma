@@ -71,8 +71,6 @@ object CallTreeManager {
         }
     }
 
-    // Subtracts lock contention overhead if needed.
-    // This should only be called by the thread that owns the ThreadState.
     private inline fun doWithLockAndAdjustOverhead(state: ThreadState, action: () -> Unit) {
         if (!state.lock.tryLock()) {
             val overhead = measureNanoTime { state.lock.lock() }
@@ -85,7 +83,6 @@ object CallTreeManager {
         }
     }
 
-    // Helps prevent StackOverflowError if the user has instrumented a callee of enter() or leave().
     private inline fun doPreventingRecursion(state: ThreadState, action: () -> Unit) {
         if (!state.busy) {
             state.busy = true

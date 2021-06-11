@@ -1,6 +1,5 @@
 package com.evgenysobko.diploma.tracer
 
-/** Encapsulates aggregate statistic for a single tracepoint. */
 class TracepointStats(
     val tracepoint: Tracepoint,
     var callCount: Long = 0L,
@@ -9,10 +8,7 @@ class TracepointStats(
 )
 
 object CallTreeUtil {
-    /**
-     * Computes aggregate statistics for each tracepoint,
-     * being careful not to double-count the time spent in recursive calls.
-     */
+
     fun computeFlatTracepointStats(root: CallTree): List<TracepointStats> {
         val allStats = mutableMapOf<Tracepoint, TracepointStats>()
         val ancestors = mutableSetOf<Tracepoint>()
@@ -41,9 +37,7 @@ object CallTreeUtil {
         return allStats.values.toList()
     }
 
-    /** Estimates total tracing overhead based on call counts in the given tree. */
     fun estimateTracingOverhead(root: CallTree): Long {
-        // TODO: Can we provide a more accurate estimate (esp. for param tracing)?
         var tracingOverhead = 0L
         root.forEachNodeInSubtree { node ->
             tracingOverhead += when (node.tracepoint) {

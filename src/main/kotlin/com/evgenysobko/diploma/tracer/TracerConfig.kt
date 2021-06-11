@@ -32,17 +32,14 @@ object TracerConfig {
 
     fun getMethodTracepoint(methodId: Int): MethodTracepoint = tracepoints.get(methodId)
 
-    /** Returns true if the given class might have methods that need to be traced. */
     fun shouldInstrumentClass(clazz: String): Boolean {
         lock.withLock {
-            // Currently O(n) in the number of trace requests---could be optimized if needed.
             return traceRequests.any { request ->
                 request.config.enabled && request.matcher.mightMatchMethodInClass(clazz)
             }
         }
     }
 
-    /** Returns [MethodTraceData] based on the most recent matching [TraceRequest]. */
     fun getMethodTraceData(m: MethodFqName): MethodTraceData? {
         lock.withLock {
             val recentMatch = traceRequests.asReversed().firstOrNull { it.matcher.matches(m) }
@@ -52,7 +49,6 @@ object TracerConfig {
                 tracepoints.append(MethodTracepoint(m))
             }
 
-            // Sync tracepoint flags.
             val config = recentMatch.config
             val tracepoint = getMethodTracepoint(methodId)
             tracepoint.measureWallTime = !config.countOnly

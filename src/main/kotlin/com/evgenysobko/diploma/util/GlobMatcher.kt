@@ -5,10 +5,6 @@ import com.intellij.util.text.Matcher
 
 object GlobMatcher {
 
-    /**
-     * Returns a string matcher for [pattern], where [pattern] may contain '*' and '?' wildcards.
-     * The matcher can be 10x faster than regex matching for certain kinds of patterns.
-     */
     fun create(pattern: String): Matcher {
         val stars = pattern.count { it == '*' }
         return when {
@@ -60,7 +56,7 @@ object GlobMatcher {
     private class RegexMatcher(pattern: String) : Matcher {
         private val regexMatcher = PatternUtil.fromMask(pattern).matcher("")
 
-        @Synchronized // regexMatcher is not thread safe.
+        @Synchronized
         override fun matches(s: String): Boolean = regexMatcher.reset(s).matches()
     }
 }

@@ -18,7 +18,7 @@ class CallTreeBuilder(clock: Clock = SystemClock) {
         override fun sample(): Long = delegate.sample() - overhead
     }
 
-    private class Tree(
+    class Tree(
         override val tracepoint: Tracepoint,
         val parent: Tree?
     ): CallTree {
@@ -75,10 +75,7 @@ class CallTreeBuilder(clock: Clock = SystemClock) {
         clock.overhead += overhead
     }
 
-    // Returns the current call tree. Careful: it is mutable (not copied).
     fun borrowUpToDateTree(): CallTree {
-
-        // Update timing data for nodes still on the stack.
         val now = clock.sample()
         val stack = generateSequence(currentNode, Tree::parent)
         for (node in stack) {
@@ -92,11 +89,10 @@ class CallTreeBuilder(clock: Clock = SystemClock) {
         return root
     }
 
-    // Resets to an empty call tree (but keeps the current call stack).
     fun clear() {
         val stack = generateSequence(currentNode, Tree::parent)
         val pathFromRoot = stack.toList().asReversed()
-        val tracepoints = pathFromRoot.drop(1).map(Tree::tracepoint) // Excludes the root.
+        val tracepoints = pathFromRoot.drop(1).map(Tree::tracepoint)
 
         root = Tree(Tracepoint.ROOT, parent = null)
         currentNode = root

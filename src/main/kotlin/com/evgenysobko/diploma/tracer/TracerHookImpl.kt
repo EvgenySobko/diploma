@@ -3,7 +3,6 @@ package com.evgenysobko.diploma.tracer
 import com.evgenysobko.diploma.agent.TracerHook
 import com.intellij.openapi.diagnostic.Logger
 
-/** Dispatches method entry/exit events to the [CallTreeManager]. */
 class TracerHookImpl : TracerHook {
 
     override fun enter(methodId: Int, args: Array<Any>?) {
@@ -28,7 +27,6 @@ class TracerHookImpl : TracerHook {
         }
     }
 
-    // In case there are bugs in the tracer, catch exceptions to protect user code.
     private inline fun doWithExceptionLogging(action: () -> Unit) {
         try {
             action()
@@ -40,9 +38,6 @@ class TracerHookImpl : TracerHook {
 
     companion object {
         init {
-            // Trigger class loading for CallTreeManager early so that it doesn't happen
-            // during tracing. This reduces the chance of invoking an instrumented method
-            // from a tracing hook (causing infinite recursion).
             CallTreeManager.enter(Tracepoint.ROOT)
             CallTreeManager.leave()
             CallTreeManager.clearCallTrees()

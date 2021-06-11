@@ -1,0 +1,2 @@
+com.test.test.TestResolveScopeEnlarger
+com.test.test.TestPsiElementFinder

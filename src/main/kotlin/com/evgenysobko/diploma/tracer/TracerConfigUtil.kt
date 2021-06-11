@@ -11,15 +11,15 @@ class TraceRequest(
 )
 
 data class MethodFqName(
-    val clazz: String, // Fully qualified class name or glob pattern.
+    val clazz: String,
     val method: String,
-    val desc: String, // See Type.getMethodDescriptor in the ASM library.
+    val desc: String,
 )
 
 class MethodConfig(
-    val enabled: Boolean = true, // Whether the method should be traced.
-    val countOnly: Boolean = false, // Whether to skip measuring wall time.
-    val tracedParams: List<Int> = emptyList(), // Support for parameter tracing.
+    val enabled: Boolean = true,
+    val countOnly: Boolean = false,
+    val tracedParams: List<Int> = emptyList(),
 )
 
 class MethodTraceData(
@@ -46,7 +46,6 @@ class MethodFqMatcher(methodPattern: MethodFqName) {
         try {
             if (!classMatcher.matches(clazz.name)) return false
 
-            // getDeclaredMethods() is quite slow, but it seems to be the only option.
             for (m in clazz.declaredMethods) {
                 if (methodMatcher.matches(m.name) &&
                     descMatcher.matches(Type.getMethodDescriptor(m))
@@ -66,8 +65,6 @@ class MethodFqMatcher(methodPattern: MethodFqName) {
             return false
         }
         catch (ignored: Throwable) {
-            // We are interacting with arbitrary user classes, so exceptions like
-            // NoClassDefFoundError may be thrown in certain corner cases.
             return false
         }
     }
@@ -82,7 +79,6 @@ object TracerConfigUtil {
         return request
     }
 
-    // This may be slow if there are many trace requests or if they use broad glob patterns.
     fun getAffectedClasses(traceRequests: Collection<TraceRequest>): List<Class<*>> {
         if (traceRequests.isEmpty()) return emptyList()
         val instrumentation = AgentLoader.instrumentation ?: return emptyList()
