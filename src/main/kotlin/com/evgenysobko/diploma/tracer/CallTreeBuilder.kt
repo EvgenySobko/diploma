@@ -53,6 +53,8 @@ class CallTreeBuilder(clock: Clock = SystemClock) {
             child.wallTimeMeasured = false
         }
 
+        
+
         currentNode = child
     }
 

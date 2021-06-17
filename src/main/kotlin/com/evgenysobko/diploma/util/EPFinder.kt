@@ -9,7 +9,7 @@ import com.intellij.serviceContainer.ComponentManagerImpl
 import java.util.function.BiConsumer
 import kotlin.properties.Delegates
 
-class EPFinder {
+object EPFinder {
 
     private val taskExecutor: (task: () -> Unit) -> Unit = { task ->
         try {
@@ -21,18 +21,20 @@ class EPFinder {
         }
     }
 
-    fun getExtendedPoints(): List<String> {
-        val epList = mutableListOf<Any>()
+    fun getExtendedPoints(): MutableList<EPWithPluginName> {
+        val epList = mutableSetOf<EPWithPluginName>()
 
-        ProjectUtil.getOpenProjects().firstOrNull()?.let {
+        //epList.addAll(checkContainer(ApplicationManager.getApplication() as ComponentManagerImpl, taskExecutor))
+
+        ProjectUtil.getOpenProjects().forEach {
             epList.addAll(checkContainer(it as ComponentManagerImpl, taskExecutor))
         }
 
-        return epList.map { it.javaClass.name }
+        return epList.toMutableList()
     }
 
-    private fun checkContainer(container: ComponentManagerImpl, taskExecutor: (task: () -> Unit) -> Unit): Set<Any> {
-        val resultSet = mutableSetOf<Any>()
+    private fun checkContainer(container: ComponentManagerImpl, taskExecutor: (task: () -> Unit) -> Unit): MutableSet<EPWithPluginName> {
+        val resultSet = mutableSetOf<EPWithPluginName>()
         container.extensionArea.processExtensionPoints { extensionPoint ->
             if (extensionPoint.name == "com.intellij.favoritesListProvider" || extensionPoint.name == "com.intellij.favoritesListProvider") {
                 return@processExtensionPoints
@@ -46,13 +48,16 @@ class EPFinder {
     private fun checkExtensionPoint(
         extensionPoint: ExtensionPointImpl<*>,
         taskExecutor: (task: () -> Unit) -> Unit = this.taskExecutor
-    ): List<Any> {
-        val resultList = mutableListOf<Any>()
+    ): MutableList<EPWithPluginName> {
+        var pluginName = ""
+        val resultList = mutableListOf<EPWithPluginName>()
         extensionPoint.processImplementations(false, BiConsumer { supplier, pluginDescriptor ->
             var extensionClass: Class<out Any> by Delegates.notNull()
             taskExecutor {
                 extensionClass = extensionPoint.extensionClass
             }
+
+            pluginName = pluginDescriptor.name
 
             taskExecutor {
                 try {
@@ -69,9 +74,14 @@ class EPFinder {
         })
 
         taskExecutor {
-            resultList.addAll(extensionPoint.extensionList)
+            resultList.add(EPWithPluginName(pluginName, extensionPoint.extensionList.toMutableSet()))
         }
 
         return resultList
     }
 }
+
+data class EPWithPluginName(
+    val name: String,
+    val epList: MutableSet<Any>
+)

@@ -9,7 +9,7 @@ class TracepointStats(
 
 object CallTreeUtil {
 
-    fun computeFlatTracepointStats(root: CallTree): List<TracepointStats> {
+    fun computeFlatTracepointStats(root: CallTree): Set<TracepointStats> {
         val allStats = mutableMapOf<Tracepoint, TracepointStats>()
         val ancestors = mutableSetOf<Tracepoint>()
 
@@ -34,7 +34,7 @@ object CallTreeUtil {
         assert(ancestors.isEmpty())
 
         allStats.remove(Tracepoint.ROOT)
-        return allStats.values.toList()
+        return allStats.values.toSet()
     }
 
     fun estimateTracingOverhead(root: CallTree): Long {
