@@ -1,7 +1,6 @@
 package com.evgenysobko.diploma.tracer
 
 import com.evgenysobko.diploma.AgentLoader
-import com.evgenysobko.diploma.util.EPFinder
 import com.evgenysobko.diploma.util.ExecutorWithExceptionLogging
 import com.evgenysobko.diploma.util.log
 import com.intellij.openapi.Disposable
@@ -11,7 +10,7 @@ import java.lang.instrument.UnmodifiableClassException
 
 class TracerController(parentDisposable: Disposable) : Disposable {
 
-    private val executor = ExecutorWithExceptionLogging("Tracer", 1)
+    private val executor = ExecutorWithExceptionLogging("Tracer", 10)
 
     init {
         Disposer.register(parentDisposable, this)
@@ -28,19 +27,21 @@ class TracerController(parentDisposable: Disposable) : Disposable {
     }
 
     fun retransformClasses(classes: Collection<Class<*>>) {
-        classes.forEach { log("class = $it") }
-        if (classes.isEmpty()) return
-        val instrumentation = AgentLoader.instrumentation ?: return
+        executor.execute {
+            classes.forEach { log("class = $it") }
+            if (classes.isEmpty()) return@execute
+            val instrumentation = AgentLoader.instrumentation ?: return@execute
 
-        log("Retransforming ${classes.size} classes")
-        for (clazz in classes) {
-            invokeAndWaitIfNeeded {}
-            try {
-                instrumentation.retransformClasses(clazz)
-            } catch (e: UnmodifiableClassException) {
-                log("Cannot instrument non-modifiable class: ${clazz.name}")
-            } catch (e: Throwable) {
-                log("Failed to retransform class: ${clazz.name} – $e")
+            log("Retransforming ${classes.size} classes")
+            for (clazz in classes) {
+                invokeAndWaitIfNeeded {}
+                try {
+                    instrumentation.retransformClasses(clazz)
+                } catch (e: UnmodifiableClassException) {
+                    log("Cannot instrument non-modifiable class: ${clazz.name}")
+                } catch (e: Throwable) {
+                    log("Failed to retransform class: ${clazz.name} – $e")
+                }
             }
         }
     }
