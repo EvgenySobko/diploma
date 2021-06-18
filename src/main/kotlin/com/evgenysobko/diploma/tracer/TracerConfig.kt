@@ -16,20 +16,6 @@ object TracerConfig {
         }
     }
 
-    fun getAllRequests(): List<TraceRequest> {
-        lock.withLock {
-            return ArrayList(traceRequests)
-        }
-    }
-
-    fun clearAllRequests(): List<TraceRequest> {
-        lock.withLock {
-            val copy = ArrayList(traceRequests)
-            traceRequests.clear()
-            return copy
-        }
-    }
-
     fun getMethodTracepoint(methodId: Int): MethodTracepoint = tracepoints.get(methodId)
 
     fun shouldInstrumentClass(clazz: String): Boolean {

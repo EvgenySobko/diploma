@@ -1,15 +1,17 @@
 package com.evgenysobko.diploma.ui
 
 import com.evgenysobko.diploma.toolwindow.EPWithPluginNameAndTracepointStats
+import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 import javax.swing.table.AbstractTableModel
 
 class TableModel : AbstractTableModel() {
 
-    enum class Column(val displayName: String, val type: Class<*>) {
+    enum class Column(val displayName: String, val type: Type) {
         PLUGIN_NAME("Plugin Name", EPWithPluginNameAndTracepointStats::class.java),
-        CLASSES("Classes", EPWithPluginNameAndTracepointStats::class.java),
-        CALLS("Calls", EPWithPluginNameAndTracepointStats::class.java),
-        WALL_TIME("Wall Time", EPWithPluginNameAndTracepointStats::class.java);
+        CLASSES("Classes and Methods", object : TypeToken<List<String>>() {}.type),
+        CALLS("Calls Count", object : TypeToken<List<Long>>() {}.type),
+        WALL_TIME("Wall Time (in ms)", object : TypeToken<List<Long>>() {}.type);
 
         companion object {
             val values = values()
@@ -24,7 +26,7 @@ class TableModel : AbstractTableModel() {
 
     override fun getColumnName(column: Int): String = Column.valueOf(column).displayName
 
-    override fun getColumnClass(columnIndex: Int): Class<*> = Column.valueOf(columnIndex).type
+    override fun getColumnClass(columnIndex: Int): Class<*> = Column.valueOf(columnIndex).javaClass
 
     override fun getColumnCount(): Int = Column.count
 
@@ -41,6 +43,7 @@ class TableModel : AbstractTableModel() {
             }
         }
         data = distinctList.distinctBy { it.pluginName }
+        data.sortedBy { it.pluginName }
         fireTableDataChanged()
     }
 }
