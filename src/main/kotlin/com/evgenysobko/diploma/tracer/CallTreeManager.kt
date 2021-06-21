@@ -52,17 +52,6 @@ object CallTreeManager {
         return mergedTree
     }
 
-    fun getCallTreeSnapshotEdtOnly(): CallTree {
-        val edtState = allThreadState.firstOrNull { it.isEdt }
-        if (edtState == null) {
-            return MutableCallTree(Tracepoint.ROOT)
-        }
-        edtState.lock.withLock {
-            val tree = edtState.callTreeBuilder.borrowUpToDateTree()
-            return tree.copy()
-        }
-    }
-
     fun clearCallTrees() {
         for (threadState in allThreadState) {
             threadState.lock.withLock {

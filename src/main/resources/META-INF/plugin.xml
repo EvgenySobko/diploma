@@ -3,11 +3,19 @@
     <name>PluginsPerformance</name>
     <vendor>evgenysobko</vendor>
 
+    <description>
+        This plugin is based on IDE-Perf plugin and contains Java-agent,
+        which could instrument all classes and methods of installed plugins.
+        This is necessary in order to understanding which plugins may downtime your IDE
+        and you could disable them or delete.
+    </description>
+
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends>
+
+    <idea-version since-build="202.*" until-build="211.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="myPlugin" anchor="bottom" secondary="true" doNotActivateOnStart="true"
+        <toolWindow id="PluginsPerformance" anchor="bottom" secondary="true" doNotActivateOnStart="true"
                     factoryClass="com.evgenysobko.diploma.toolwindow.ToolWindowFactory"/>
     </extensions>
 

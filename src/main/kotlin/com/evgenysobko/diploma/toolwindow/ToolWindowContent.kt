@@ -23,6 +23,8 @@ object ToolWindowContent {
             content.preferredSize = it
             jbScrollPane = JBScrollPane(table)
             jbScrollPane!!.border = null
+            jbScrollPane!!.autoscrolls = false
+            content.autoscrolls = false
             table.border = null
         }
         content.add(jbScrollPane)

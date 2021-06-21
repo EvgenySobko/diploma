@@ -37,12 +37,13 @@ object CallTreeUtil {
         return allStats.values.toSet()
     }
 
+    // This one exists for calculation of overhead time
     fun estimateTracingOverhead(root: CallTree): Long {
         var tracingOverhead = 0L
         root.forEachNodeInSubtree { node ->
             tracingOverhead += when (node.tracepoint) {
-                is MethodTracepointWithArgs -> 1024 * node.callCount // A complete guess.
-                else -> 256 * node.callCount // See TracerIntegrationTest.testTracingOverhead.
+                is MethodTracepointWithArgs -> 1024 * node.callCount
+                else -> 256 * node.callCount
             }
         }
         return tracingOverhead

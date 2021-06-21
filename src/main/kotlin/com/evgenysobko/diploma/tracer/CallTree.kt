@@ -14,12 +14,6 @@ interface CallTree {
         }
     }
 
-    fun allNodesInSubtree(): Sequence<CallTree> {
-        val nodes = mutableListOf<CallTree>()
-        forEachNodeInSubtree { nodes.add(it) }
-        return nodes.asSequence()
-    }
-
     fun copy(): CallTree {
         val copy = MutableCallTree(Tracepoint.ROOT)
         copy.accumulate(this)

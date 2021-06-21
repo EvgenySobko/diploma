@@ -30,10 +30,7 @@ class TracerClassFileTransformer : ClassFileTransformer {
             } else {
                 null
             }
-        } catch (e: Throwable) {
-            //Logger.getInstance(javaClass).error("Failed to instrument class $classJvmName", e)
-            null
-        }
+        } catch (e: Throwable) { null }
     }
 
     private fun tryTransform(

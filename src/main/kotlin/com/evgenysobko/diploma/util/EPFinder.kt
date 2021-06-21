@@ -2,6 +2,7 @@ package com.evgenysobko.diploma.util
 
 import com.intellij.diagnostic.PluginException
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.extensions.ExtensionNotApplicableException
 import com.intellij.openapi.extensions.impl.ExtensionPointImpl
 import com.intellij.openapi.progress.ProcessCanceledException
@@ -22,15 +23,15 @@ object EPFinder {
     }
 
     fun getExtendedPoints(): MutableList<EPWithPluginName> {
-        val epList = mutableSetOf<EPWithPluginName>()
+        val epList = mutableListOf<EPWithPluginName>()
 
-        //epList.addAll(checkContainer(ApplicationManager.getApplication() as ComponentManagerImpl, taskExecutor))
+        epList.addAll(checkContainer(ApplicationManager.getApplication() as ComponentManagerImpl, taskExecutor))
 
         ProjectUtil.getOpenProjects().forEach {
             epList.addAll(checkContainer(it as ComponentManagerImpl, taskExecutor))
         }
 
-        return epList.toMutableList()
+        return epList
     }
 
     private fun checkContainer(container: ComponentManagerImpl, taskExecutor: (task: () -> Unit) -> Unit): MutableSet<EPWithPluginName> {

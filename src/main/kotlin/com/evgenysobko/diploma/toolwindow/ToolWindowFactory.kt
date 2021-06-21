@@ -51,7 +51,7 @@ class ToolWindowFactory : ToolWindowFactory {
     }
 
     private fun updateData(disposable: Disposable) {
-        val refreshFuture = Executors.newSingleThreadScheduledExecutor()
+        val refreshFuture = Executors.newScheduledThreadPool(10)
             .scheduleWithFixedDelay(::updateCallTree, 0, 3000, TimeUnit.MILLISECONDS)
         disposable.attach { refreshFuture.cancel(false) }
     }

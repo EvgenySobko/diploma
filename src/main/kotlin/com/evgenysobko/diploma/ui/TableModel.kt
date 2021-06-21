@@ -1,13 +1,14 @@
 package com.evgenysobko.diploma.ui
 
 import com.evgenysobko.diploma.toolwindow.EPWithPluginNameAndTracepointStats
+import com.evgenysobko.diploma.util.formatNsInMs
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 import javax.swing.table.AbstractTableModel
 
 class TableModel : AbstractTableModel() {
 
-    enum class Column(val displayName: String, val type: Type) {
+    enum class Column(val displayName: String, type: Type) {
         PLUGIN_NAME("Plugin Name", EPWithPluginNameAndTracepointStats::class.java),
         CLASSES("Classes and Methods", object : TypeToken<List<String>>() {}.type),
         CALLS("Calls Count", object : TypeToken<List<Long>>() {}.type),
@@ -42,6 +43,7 @@ class TableModel : AbstractTableModel() {
                 }
             }
         }
+        distinctList.forEach { it.stats.removeIf { it.wallTime.formatNsInMs() < 0.toString() } }
         data = distinctList.distinctBy { it.pluginName }
         data.sortedBy { it.pluginName }
         fireTableDataChanged()

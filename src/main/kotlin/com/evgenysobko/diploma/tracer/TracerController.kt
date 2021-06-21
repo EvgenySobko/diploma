@@ -28,7 +28,6 @@ class TracerController(parentDisposable: Disposable) : Disposable {
 
     fun retransformClasses(classes: Collection<Class<*>>) {
         executor.execute {
-            classes.forEach { log("class = $it") }
             if (classes.isEmpty()) return@execute
             val instrumentation = AgentLoader.instrumentation ?: return@execute
 
