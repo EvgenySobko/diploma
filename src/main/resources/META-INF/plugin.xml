@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>com.evgenysobko.diploma</id>
-    <name>PluginsPerformance</name>
+    <name>ExtensionsPerformance</name>
     <vendor>evgenysobko</vendor>
 
     <description>
