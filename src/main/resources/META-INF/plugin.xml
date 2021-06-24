@@ -8,6 +8,8 @@
         which could instrument all classes and methods of installed plugins.
         This is necessary in order to understanding which plugins may downtime your IDE
         and you could disable them or delete.
+
+        If you want to make it better here is github repository: https://github.com/EvgenySobko/diploma
     </description>
 
     <depends>com.intellij.modules.platform</depends>

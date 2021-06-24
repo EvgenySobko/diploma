@@ -1,21 +1,20 @@
 package com.evgenysobko.diploma.toolwindow
 
-import com.evgenysobko.diploma.AgentLoader
 import com.evgenysobko.diploma.ui.Table
 import com.evgenysobko.diploma.ui.TableModel
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.components.JBScrollPane
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.JPanel
 
-object ToolWindowContent {
+object ToolWindowContent: DumbAware {
 
     lateinit var content: JPanel
     private val tableModel: TableModel = TableModel()
 
     fun init(toolWindow: ToolWindow) {
-        AgentLoader.ensureJavaAgentLoaded
         val table = Table(tableModel)
         var jbScrollPane: JBScrollPane? = null
         content = JPanel(BorderLayout())

@@ -1,6 +1,7 @@
 package com.evgenysobko.diploma.tracer
 
 import com.evgenysobko.diploma.agent.TracerTrampoline
+import com.evgenysobko.diploma.util.log
 import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes.ASM8
 import org.objectweb.asm.*
@@ -111,7 +112,7 @@ class TracerMethodVisitor(
             buildCatchBlock()
         } else {
             val fqName = "$clazz.$method$desc"
-            LOG.warn("Unable to instrument $fqName because ASM failed to call onMethodEnter")
+            log("Unable to instrument $fqName because ASM failed to call onMethodEnter")
         }
         super.visitMaxs(maxStack, maxLocals)
     }
@@ -120,7 +121,7 @@ class TracerMethodVisitor(
         catchException(methodStart, mark(), THROWABLE_TYPE)
         visitFrame(F_NEW, 0, emptyArray(), 1, arrayOf(THROWABLE_TYPE.internalName))
         invokeStatic(TRAMPOLINE_TYPE, TRAMPOLINE_LEAVE_METHOD)
-        throwException() // Rethrow.
+        throwException()
     }
 
     private fun loadTracedArgs() {

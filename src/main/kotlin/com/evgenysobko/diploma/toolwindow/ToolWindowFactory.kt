@@ -1,9 +1,11 @@
 package com.evgenysobko.diploma.toolwindow
 
+import com.evgenysobko.diploma.AgentLoader
 import com.evgenysobko.diploma.tracer.*
 import com.evgenysobko.diploma.util.EPFinder
-import com.evgenysobko.diploma.util.EPWithPluginName
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.options.ConfigurableEP
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.rd.attach
 import com.intellij.openapi.wm.ToolWindow
@@ -13,24 +15,31 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.swing.SwingUtilities
 
-class ToolWindowFactory : ToolWindowFactory {
+class ToolWindowFactory : ToolWindowFactory, DumbAware {
 
     private lateinit var myToolWindow: ToolWindowContent
 
-    private val listOfEPWithPluginName: MutableList<EPWithPluginName> = mutableListOf()
+    private val listOfEPWithPluginName: MutableMap<String, MutableList<Any>> = mutableMapOf()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         myToolWindow = ToolWindowContent
         myToolWindow.init(toolWindow)
+        toolWindow.apply {
+            hide { disposable.dispose() }
+            show {
+                if (AgentLoader.ensureJavaAgentLoaded) {
+                    SwingUtilities.invokeLater {
+                        disposable.also {
+                            startTransformClasses(it)
+                            updateData(it)
+                        }
+                    }
+                }
+            }
+        }
         val contentFactory = ContentFactory.SERVICE.getInstance()
         val content = contentFactory.createContent(myToolWindow.content, "", false)
         toolWindow.contentManager.addContent(content)
-        SwingUtilities.invokeLater {
-            toolWindow.disposable.also {
-                startTransformClasses(it)
-                updateData(it)
-            }
-        }
     }
 
     private fun startTransformClasses(disposable: Disposable) {
@@ -38,11 +47,17 @@ class ToolWindowFactory : ToolWindowFactory {
         val extensionPoints = EPFinder.getExtendedPoints()
         val config = MethodConfig()
         val requests = mutableListOf<TraceRequest>()
-        extensionPoints.forEach { epWithName ->
-            listOfEPWithPluginName.add(epWithName)
-            epWithName.epList.forEach {
-                val request = TracerConfigUtil.appendTraceRequest(MethodFqName(it.javaClass.name, "*", "*"), config)
-                requests.add(request)
+        extensionPoints.keys.forEach { name ->
+            if (listOfEPWithPluginName[name].isNullOrEmpty()) {
+                listOfEPWithPluginName[name] = extensionPoints[name]!!
+            } else {
+                listOfEPWithPluginName[name]!!.addAll(extensionPoints[name]!!)
+            }
+            extensionPoints[name]?.forEach {
+                if (it !is ConfigurableEP<*>) {
+                    val request = TracerConfigUtil.appendTraceRequest(MethodFqName(it.javaClass.name, "*", "*"), config)
+                    requests.add(request)
+                }
             }
         }
         val affectedClasses = TracerConfigUtil.getAffectedClasses(requests)
@@ -62,22 +77,21 @@ class ToolWindowFactory : ToolWindowFactory {
         val stats = CallTreeUtil.computeFlatTracepointStats(treeSnapshot)
 
         if (stats.isNotEmpty()) {
-            listOfEPWithPluginName.forEach { epWithPluginName ->
-                val pluginName = epWithPluginName.name
-                val tracepointStatsForPlugin = mutableSetOf<TracepointStats>()
-                epWithPluginName.epList.forEach {
+            listOfEPWithPluginName.keys.forEach { name ->
+                listOfEPWithPluginName[name]?.forEach { extension ->
+                    val tracepointStatsForPlugin = mutableSetOf<TracepointStats>()
                     stats.forEach { tracepointStats ->
-                        if (it.javaClass.name == tracepointStats.tracepoint.detailedName.split(" ")[1].split("\n")[0]) {
+                        if (extension.javaClass.name == tracepointStats.tracepoint.detailedName.split(" ")[1].split("\n")[0]) {
                             tracepointStatsForPlugin.add(tracepointStats)
                         }
                     }
-                }
-                if (pluginName.isNotEmpty() && tracepointStatsForPlugin.isNotEmpty()) {
-                    result.add(EPWithPluginNameAndTracepointStats(pluginName, tracepointStatsForPlugin))
+                    if (name.isNotEmpty() && tracepointStatsForPlugin.isNotEmpty()) {
+                        result.add(EPWithPluginNameAndTracepointStats(name, tracepointStatsForPlugin))
+                    }
                 }
             }
+            if (result.isNotEmpty()) myToolWindow.updateData(result)
         }
-        if (result.isNotEmpty()) myToolWindow.updateData(result)
     }
 }
 

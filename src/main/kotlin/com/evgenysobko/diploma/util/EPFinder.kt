@@ -7,7 +7,6 @@ import com.intellij.openapi.extensions.ExtensionNotApplicableException
 import com.intellij.openapi.extensions.impl.ExtensionPointImpl
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.serviceContainer.ComponentManagerImpl
-import java.util.function.BiConsumer
 import kotlin.properties.Delegates
 
 object EPFinder {
@@ -22,43 +21,59 @@ object EPFinder {
         }
     }
 
-    fun getExtendedPoints(): MutableList<EPWithPluginName> {
-        val epList = mutableListOf<EPWithPluginName>()
+    fun getExtendedPoints(): MutableMap<String, MutableList<Any>> {
+        val epList = mutableMapOf<String, MutableList<Any>>()
 
-        epList.addAll(checkContainer(ApplicationManager.getApplication() as ComponentManagerImpl, taskExecutor))
+        val firstMap = checkContainer(ApplicationManager.getApplication() as ComponentManagerImpl, taskExecutor)
+        firstMap.keys.forEach { key ->
+            if (epList.containsKey(key)) {
+                epList[key]!!.addAll(firstMap[key]!!)
+            } else {
+                if (epList[key].isNullOrEmpty()) epList[key] = firstMap[key]!!
+                else epList[key]!!.add(firstMap[key]!!)
+            }
+        }
 
         ProjectUtil.getOpenProjects().forEach {
-            epList.addAll(checkContainer(it as ComponentManagerImpl, taskExecutor))
+            val newMap = checkContainer(it as ComponentManagerImpl, taskExecutor)
+            newMap.keys.forEach { key ->
+                if (epList.containsKey(key)) {
+                    epList[key]!!.addAll(newMap[key]!!)
+                } else {
+                    if (epList[key].isNullOrEmpty()) epList[key] = newMap[key]!!
+                    else epList[key]!!.add(newMap[key]!!)
+                }
+            }
         }
+        log(epList["BadPlugin"])
 
         return epList
     }
 
-    private fun checkContainer(container: ComponentManagerImpl, taskExecutor: (task: () -> Unit) -> Unit): MutableSet<EPWithPluginName> {
-        val resultSet = mutableSetOf<EPWithPluginName>()
-        container.extensionArea.processExtensionPoints { extensionPoint ->
-            if (extensionPoint.name == "com.intellij.favoritesListProvider" || extensionPoint.name == "com.intellij.favoritesListProvider") {
-                return@processExtensionPoints
-            }
-
-            resultSet.addAll(checkExtensionPoint(extensionPoint, taskExecutor))
+    private fun checkContainer(container: ComponentManagerImpl, taskExecutor: (task: () -> Unit) -> Unit): MutableMap<String, MutableList<Any>> {
+        val result = mutableMapOf<String, MutableList<Any>>()
+        container.extensionArea.processExtensionPoints {
+            result.putAll(checkExtensionPoint(it, taskExecutor))
         }
-        return resultSet
+        return result
     }
 
     private fun checkExtensionPoint(
         extensionPoint: ExtensionPointImpl<*>,
-        taskExecutor: (task: () -> Unit) -> Unit = this.taskExecutor
-    ): MutableList<EPWithPluginName> {
+        taskExecutor: (task: () -> Unit) -> Unit = this.taskExecutor,
+    ): MutableMap<String, MutableList<Any>> {
         var pluginName = ""
-        val resultList = mutableListOf<EPWithPluginName>()
-        extensionPoint.processImplementations(false, BiConsumer { supplier, pluginDescriptor ->
+        val resultList = mutableMapOf<String, MutableList<Any>>()
+        extensionPoint.processImplementations(false) { supplier, pluginDescriptor ->
             var extensionClass: Class<out Any> by Delegates.notNull()
-            taskExecutor {
-                extensionClass = extensionPoint.extensionClass
-            }
 
             pluginName = pluginDescriptor.name
+
+            try {
+                extensionClass = extensionPoint.extensionClass
+            } catch (notFound: Exception) {
+                log("Extension class for ep = ${extensionPoint.name} not found")
+            }
 
             taskExecutor {
                 try {
@@ -68,21 +83,18 @@ object EPFinder {
                             "Extension ${extension.javaClass.name} does not implement $extensionClass",
                             pluginDescriptor.pluginId
                         )
-                    }
-                } catch (ignore: ExtensionNotApplicableException) {
-                }
-            }
-        })
+                    } else {
+                        if (!resultList.keys.contains(pluginName)) {
+                            resultList.put(pluginName, mutableListOf(extension))
+                        } else {
+                            resultList[pluginName]!!.add(extension)
+                        }
 
-        taskExecutor {
-            resultList.add(EPWithPluginName(pluginName, extensionPoint.extensionList.toMutableSet()))
+                    }
+                } catch (ignore: ExtensionNotApplicableException) {}
+            }
         }
 
         return resultList
     }
 }
-
-data class EPWithPluginName(
-    val name: String,
-    val epList: MutableSet<Any>
-)

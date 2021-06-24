@@ -69,8 +69,8 @@ class Table(tableModel: TableModel) : JBTable(tableModel) {
                                 if (minHeight == -1) {
                                     minHeight = table.rowHeight
                                 }
-                                if (currHeight != passed.size * minHeight) {
-                                    currHeight = passed.size * minHeight
+                                if (currHeight != (passed.size + 1) * minHeight) {
+                                    currHeight = (passed.size + 1) * minHeight
                                     table.setRowHeight(row, currHeight)
                                 }
 
