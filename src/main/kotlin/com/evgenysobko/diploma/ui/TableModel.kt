@@ -10,6 +10,7 @@ class TableModel : AbstractTableModel() {
 
     enum class Column(val displayName: String, type: Type) {
         PLUGIN_NAME("Plugin Name", EPWithPluginNameAndTracepointStats::class.java),
+        TOTAL_WALL_TIME("Total Time", EPWithPluginNameAndTracepointStats::class.java),
         CLASSES("Classes and Methods", object : TypeToken<List<String>>() {}.type),
         CALLS("Calls Count", object : TypeToken<List<Long>>() {}.type),
         WALL_TIME("Wall Time (in ms)", object : TypeToken<List<Long>>() {}.type);

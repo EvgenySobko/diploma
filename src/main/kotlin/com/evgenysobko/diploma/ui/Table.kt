@@ -2,6 +2,7 @@ package com.evgenysobko.diploma.ui
 
 import com.evgenysobko.diploma.toolwindow.EPWithPluginNameAndTracepointStats
 import com.evgenysobko.diploma.tracer.TracepointStats
+import com.evgenysobko.diploma.util.formatNsInMs
 import com.evgenysobko.diploma.util.fromNsToMs
 import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.ui.table.JBTable
@@ -32,28 +33,36 @@ class Table(tableModel: TableModel) : JBTable(tableModel) {
 
             val columns = table.columnModel.columns.toList()
 
-            val pluginNameColumn = columns[0]
-            SwingUtilities.invokeLater {
-                with(pluginNameColumn) {
-                    minWidth = 200
-                    cellRenderer = object : DefaultTableCellRenderer() {
+            for (i in 0..1) {
+                SwingUtilities.invokeLater {
+                    with(columns[i]) {
+                        minWidth = 200
+                        cellRenderer = object : DefaultTableCellRenderer() {
 
-                        init {
-                            horizontalAlignment = SwingConstants.LEFT
-                            verticalAlignment = SwingConstants.TOP
-                        }
+                            init {
+                                horizontalAlignment = SwingConstants.LEFT
+                                verticalAlignment = SwingConstants.TOP
+                            }
 
-                        override fun setValue(value: Any?) {
-                            if (value == null) return super.setValue(value)
-                            val ep = value as EPWithPluginNameAndTracepointStats
-                            super.setValue(ep.pluginName)
+                            override fun setValue(value: Any?) {
+                                if (value == null) return super.setValue(value)
+                                val ep = value as EPWithPluginNameAndTracepointStats
+                                when (i) {
+                                    0 -> super.setValue(ep.pluginName)
+                                    1 -> {
+                                        var totalTime = 0L
+                                        ep.stats.map { totalTime += it.wallTime }
+                                        super.setValue(totalTime.formatNsInMs())
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
             SwingUtilities.invokeLater {
-                for (i in 1 until columns.size) {
+                for (i in 2 until columns.size) {
                     with(columns[i]) {
                         minWidth = 200
                         cellRenderer = object : DefaultTableCellRenderer() {
@@ -92,9 +101,9 @@ class Table(tableModel: TableModel) : JBTable(tableModel) {
                                             val newValue = value as TracepointStats
                                             var result: Any? = null
                                             when (i) {
-                                                1 -> result = newValue.tracepoint.displayName
-                                                2 -> result = newValue.callCount
-                                                3 -> result = newValue.wallTime.fromNsToMs()
+                                                2 -> result = newValue.tracepoint.displayName
+                                                3 -> result = newValue.callCount
+                                                4 -> result = newValue.wallTime.fromNsToMs()
                                             }
                                             super.setValue(result)
                                         }
