@@ -4,7 +4,6 @@ import com.evgenysobko.diploma.AgentLoader
 import com.evgenysobko.diploma.tracer.*
 import com.evgenysobko.diploma.util.EPFinder
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.options.ConfigurableEP
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.rd.attach
@@ -19,7 +18,7 @@ class ToolWindowFactory : ToolWindowFactory, DumbAware {
 
     private lateinit var myToolWindow: ToolWindowContent
 
-    private val listOfEPWithPluginName: MutableMap<String, MutableList<Any>> = mutableMapOf()
+    private val listOfEPWithPluginName: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         myToolWindow = ToolWindowContent
@@ -54,10 +53,8 @@ class ToolWindowFactory : ToolWindowFactory, DumbAware {
                 listOfEPWithPluginName[name]!!.addAll(extensionPoints[name]!!)
             }
             extensionPoints[name]?.forEach {
-                if (it !is ConfigurableEP<*>) {
-                    val request = TracerConfigUtil.appendTraceRequest(MethodFqName(it.javaClass.name, "*", "*"), config)
-                    requests.add(request)
-                }
+                val request = TracerConfigUtil.appendTraceRequest(MethodFqName(it, "*", "*"), config)
+                requests.add(request)
             }
         }
         val affectedClasses = TracerConfigUtil.getAffectedClasses(requests)
@@ -81,7 +78,7 @@ class ToolWindowFactory : ToolWindowFactory, DumbAware {
                 listOfEPWithPluginName[name]?.forEach { extension ->
                     val tracepointStatsForPlugin = mutableSetOf<TracepointStats>()
                     stats.forEach { tracepointStats ->
-                        if (extension.javaClass.name == tracepointStats.tracepoint.detailedName.split(" ")[1].split("\n")[0]) {
+                        if (extension == tracepointStats.tracepoint.detailedName.split(" ")[1].split("\n")[0]) {
                             tracepointStatsForPlugin.add(tracepointStats)
                         }
                     }
