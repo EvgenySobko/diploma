@@ -95,11 +95,23 @@ class ToolWindowFactory : ToolWindowFactory, DumbAware {
 data class EPWithPluginNameAndTracepointStats(
     val pluginName: String,
     val stats: MutableSet<TracepointStats>
-) {
+): Comparable<EPWithPluginNameAndTracepointStats>{
 
     fun mergeWithOther(epWithPluginNameAndTracepointStats: EPWithPluginNameAndTracepointStats) {
         if (epWithPluginNameAndTracepointStats.pluginName == this.pluginName) {
             this.stats.addAll(epWithPluginNameAndTracepointStats.stats)
+        }
+    }
+
+    override fun compareTo(other: EPWithPluginNameAndTracepointStats): Int {
+        var totalWallTimeFirst = 0L
+        var totalWallTimeSecond = 0L
+        this.stats.forEach { totalWallTimeFirst += it.wallTime }
+        other.stats.forEach { totalWallTimeSecond += it.wallTime }
+        return when {
+            totalWallTimeFirst > totalWallTimeSecond -> 1
+            totalWallTimeFirst < totalWallTimeSecond -> -1
+            else -> 0
         }
     }
 }
