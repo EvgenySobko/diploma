@@ -34,6 +34,11 @@ class TableModel : AbstractTableModel() {
 
     override fun getValueAt(row: Int, col: Int): Any = data[row]
 
+    fun clearData() {
+        data = emptyList()
+        fireTableDataChanged()
+    }
+
     fun updateData(list: Set<EPWithPluginNameAndTracepointStats>) {
         val distinctList = mutableSetOf<EPWithPluginNameAndTracepointStats>()
         for (i in 0 until list.size - 1) {

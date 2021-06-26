@@ -7,6 +7,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.components.JBScrollPane
 import java.awt.BorderLayout
 import java.awt.Dimension
+import javax.swing.JButton
 import javax.swing.JPanel
 
 object ToolWindowContent: DumbAware {
@@ -18,6 +19,8 @@ object ToolWindowContent: DumbAware {
         val table = Table(tableModel)
         var jbScrollPane: JBScrollPane? = null
         content = JPanel(BorderLayout())
+        val jButton = JButton("Clear")
+        jButton.addActionListener { tableModel.clearData() }
         Dimension(toolWindow.component.width, toolWindow.component.height).let {
             content.preferredSize = it
             jbScrollPane = JBScrollPane(table)
@@ -26,7 +29,11 @@ object ToolWindowContent: DumbAware {
             content.autoscrolls = false
             table.border = null
         }
-        content.add(jbScrollPane)
+        content.apply {
+            add(jbScrollPane)
+            jButton.maximumSize = Dimension(100, 100)
+            add(jButton, BorderLayout.WEST)
+        }
     }
 
     fun updateData(resultList: Set<EPWithPluginNameAndTracepointStats>) = tableModel.updateData(resultList)
