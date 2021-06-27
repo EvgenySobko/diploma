@@ -1,7 +1,7 @@
 package com.evgenysobko.diploma.tracer
 
 import com.evgenysobko.diploma.AgentLoader
-import com.evgenysobko.diploma.util.ExecutorWithExceptionLogging
+import com.evgenysobko.diploma.util.Executor
 import com.evgenysobko.diploma.util.log
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.invokeAndWaitIfNeeded
@@ -10,7 +10,7 @@ import java.lang.instrument.UnmodifiableClassException
 
 class TracerController(parentDisposable: Disposable) : Disposable {
 
-    private val executor = ExecutorWithExceptionLogging("Tracer", 10)
+    private val executor = Executor("Tracer", 10)
 
     init {
         Disposer.register(parentDisposable, this)

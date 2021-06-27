@@ -1,6 +1,5 @@
 package com.evgenysobko.diploma.tracer
 
-import com.intellij.util.ui.EDT
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -8,7 +7,7 @@ import kotlin.system.measureNanoTime
 
 object CallTreeManager {
 
-    private class ThreadState(val isEdt: Boolean) {
+    private class ThreadState {
         var busy = false
         val lock = ReentrantLock()
         var callTreeBuilder = CallTreeBuilder()
@@ -18,7 +17,7 @@ object CallTreeManager {
 
     private val threadState: ThreadLocal<ThreadState> =
         ThreadLocal.withInitial {
-            val state = ThreadState(EDT.isCurrentThreadEdt())
+            val state = ThreadState()
             allThreadState.add(state)
             state
         }
